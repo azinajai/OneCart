@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register</title>
+  <link rel="stylesheet" href="css/login.css" />
+  <style>
+    body{
+      background-image: url("images/123.jpg");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <form class="login-form">
+      <h2>Register</h2>
+      <p>Create your account</p>
+
+      <input type="text" id="username" placeholder="Username" />
+      <div class="password-container">
+        <input type="password" id="password" placeholder="Password" />
+        <span class="toggle-password">👁️</span>
+      </div>
+
+      <button type="button" id="registerBtn">REGISTER</button>
+
+      <div class="social-login">
+        <p>Or Register With</p>
+        <div class="social-buttons">
+          <button class="fb">Facebook</button>
+          <button class="tw">Twitter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script type="module">
+    import { registerUser } from "./js/api.js";
+
+    document.getElementById("registerBtn").addEventListener("click", async () => {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (!username || !password) return alert("Enter username and password");
+
+      const res = await registerUser(username, password);
+      alert(res.message || "Registration complete!");
+      location.href = "login.html";
+    });
+
+    // Toggle password visibility
+    document.querySelector(".toggle-password").addEventListener("click", () => {
+      const passField = document.getElementById("password");
+      passField.type = passField.type === "password" ? "text" : "password";
+    });
+  </script>
+</body>
+</html>

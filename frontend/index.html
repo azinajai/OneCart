@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuxeCart - Home</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body{
+    background-color: rgb(93, 124, 181);
+  }
+  .footer{
+    background-color: black;
+    height: 20px;
+    width:100%;
+  }
+  p{
+    color:black;
+    font-size: 10px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>OneCartPice</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="cart.html">Cart</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+  </nav>
+</header>
+
+<main>
+  <div class="slider">
+    <div class="slides">
+      <img src="images/slide1.webp" class="slide active">
+      <img src="images/slide2.jpg" class="slide">
+      <img src="images/slide3.jpg" class="slide">
+    </div>
+
+    <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
+    <button class="next" onclick="moveSlide(1)">&#10095;</button>
+  </div>
+
+  <h2>Welcome to OneCartPice Luxury Store</h2>
+  <p>Shop exclusive products with luxury experience.</p>
+  <a href="shop.html"><button>Start Shopping</button></a>
+</main>
+
+<script src="js/slider.js"></script>
+<p>Created By Vasanth</p>
+</body>
+ 
+</html>

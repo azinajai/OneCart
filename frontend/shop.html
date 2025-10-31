@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuxeCart - Shop</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body {
+    background-color: rgb(90, 125, 200);
+    font-family: Arial, sans-serif;
+  }
+
+  header {
+    background: black;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+  }
+
+  header nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  header nav a:hover {
+    text-decoration: underline;
+  }
+
+  main {
+    padding: 30px;
+  }
+
+  h2 {
+    margin-bottom: 20px;
+    font-size: 26px;
+  }
+
+  #product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 100px;
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    padding: 15px;
+    transition: transform 0.3s ease;
+  }
+
+  li:hover {
+    transform: scale(1.05);
+  }
+
+  li img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+
+  li h3 {
+    margin-top: 10px;
+    font-size: 18px;
+    color: black;
+  }
+
+  li p {
+    font-weight: bold;
+    color: #222;
+  }
+
+  button {
+    background: black;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    margin-top: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  button:hover {
+    background: #444;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>OneCartPice</h1>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Register</a>
+  </nav>
+</header>
+
+<main>
+  <h2>Products</h2>
+  <ul id="product-list"></ul>
+</main>
+
+<script type="module">
+import { fetchProducts } from "./js/api.js";
+
+const list = document.getElementById("product-list");
+
+const renderProducts = async () => {
+  const products = await fetchProducts();
+
+  list.innerHTML = products.map(p => `
+    <li>
+      <a href="product.html?id=${p.id}" style="text-decoration: none; color: inherit;">
+        <img src="images/products/${p.image}" alt="${p.name}" />
+        <h3>${p.name}</h3>
+      </a>
+      <p>$${p.price}</p>
+      <button onclick="addToCart(${p.id}); event.stopPropagation();">Add to Cart</button>
+    </li>
+  `).join("");
+};
+
+window.addToCart = (id) => {
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const exists = cart.find(c => c.id === id);
+  if (exists) exists.qty++;
+  else cart.push({ id, qty: 1 });
+  localStorage.setItem("cart", JSON.stringify(cart));
+  alert("Added to cart!");
+};
+
+renderProducts();
+</script>
+</body>
+</html>

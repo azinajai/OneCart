@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shopping Cart</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: rgb(90, 125, 200);
+      padding: 40px;
+    }
+
+    .container {
+      display: flex;
+      max-width: 1000px;
+      margin: auto;
+      background: #94c6d6;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .cart-section {
+      flex: 2;
+      padding: 30px;
+    }
+
+    .summary-section {
+      flex: 1;
+      background: #aec6ce;
+      padding: 30px;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .cart-item img {
+      width: 60px;
+      border-radius: 6px;
+    }
+
+    .item-details {
+      flex: 1;
+      margin-left: 15px;
+    }
+
+    .item-details h4 {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .item-details p {
+      margin: 5px 0;
+      color: #888;
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .qty-btn {
+      width: 30px;
+      height: 30px;
+      border: 1px solid #ccc;
+      background: none;
+      cursor: pointer;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 30px;
+      cursor: pointer;
+    }
+
+    .remove-btn:hover {
+      color: red;
+    }
+
+    .cart-header {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .summary-section h3 {
+      margin-top: 0;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+    }
+
+    .summary-section select,
+    .summary-section input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .checkout-btn {
+      width: 100%;
+      background: black;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #333;
+      text-decoration: none;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ✅ Responsive Design Fix */
+    @media (max-width: 768px) {
+      body {
+        padding: 20px;
+      }
+
+      .container {
+        flex-direction: column;  /* Stack vertically */
+        width: 100%;
+      }
+
+      .cart-section, 
+      .summary-section {
+        flex: none;
+        width: 100%;
+        padding: 20px;
+      }
+
+      .summary-section {
+        margin-top: 20px;
+      }
+
+      .cart-item {
+        flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+        text-align: center;
+      }
+
+      .cart-item img {
+        margin-bottom: 10px;
+      }
+
+      .qty-controls {
+        justify-content: center;
+      }
+
+      .summary-section select,
+      .summary-section input {
+        font-size: 16px;
+      }
+
+      .checkout-btn {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="cart-section">
+      <div class="cart-header">Shopping Cart</div>
+      <ul id="cart-list"></ul>
+      <a href="shop.html" class="back-link">← Back to shop</a>
+    </div>
+
+    <div class="summary-section">
+      <h3>Summary</h3>
+      <div class="summary-line">
+        <span>ITEMS <span id="item-count">0</span></span>
+        <span>€<span id="subtotal">0.00</span></span>
+      </div>
+      <label for="shipping">SHIPPING</label>
+      <select id="shipping">
+        <option value="5">Standard Delivery - €5.00</option>
+        <option value="10">Express Delivery - €10.00</option>
+      </select>
+
+      <label for="discount">GIVE CODE</label>
+      <input type="text" id="discount" placeholder="Enter your code" />
+
+      <div class="summary-line" style="font-weight: bold; margin-top: 20px;">
+        <span>TOTAL PRICE</span>
+        <span>€<span id="total-price">0.00</span></span>
+      </div>
+
+      <button class="checkout-btn" id="place-order-btn">CHECKOUT</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { fetchProductById, placeOrderAPI } from "./js/api.js";
+
+    const cartList = document.getElementById("cart-list");
+    const itemCount = document.getElementById("item-count");
+    const subtotalDisplay = document.getElementById("subtotal");
+    const totalPriceDisplay = document.getElementById("total-price");
+    const shippingSelect = document.getElementById("shipping");
+
+    const updateCart = async () => {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      if (cart.length === 0) {
+        cartList.innerHTML = "<p>Your cart is empty</p>";
+        itemCount.textContent = "0";
+        subtotalDisplay.textContent = "0.00";
+        totalPriceDisplay.textContent = "0.00";
+        return;
+      }
+
+      cartList.innerHTML = "";
+      let subtotal = 0;
+
+      for (let item of cart) {
+        const product = await fetchProductById(item.id);
+        subtotal += product.price * item.qty;
+
+        cartList.innerHTML += `
+          <li class="cart-item">
+            <img src="images/products/${product.image}" alt="${product.name}" />
+            <div class="item-details">
+              <h4>${product.name}</h4>
+              <p>${product.category || "Cotton T-shirt"}</p>
+            </div>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+              <span>${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+            </div>
+            <span>€${(product.price * item.qty).toFixed(2)}</span>
+            <button class="remove-btn" onclick="removeItem(${item.id})">×</button>
+          </li>
+        `;
+      }
+
+      const shippingCost = parseFloat(shippingSelect.value);
+      itemCount.textContent = cart.reduce((acc, item) => acc + item.qty, 0);
+      subtotalDisplay.textContent = subtotal.toFixed(2);
+      totalPriceDisplay.textContent = (subtotal + shippingCost).toFixed(2);
+    };
+
+    window.changeQty = (id, change) => {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const item = cart.find(c => c.id === id);
+      if (item) {
+        item.qty += change;
+        if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCart();
+      }
+    };
+
+    window.removeItem = (id) => {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      cart = cart.filter(c => c.id !== id);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      updateCart();
+    };
+
+    shippingSelect.addEventListener("change", updateCart);
+
+    document.getElementById("place-order-btn").addEventListener("click", async () => {
+      const shipping = document.getElementById("shipping").value;
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      let total = 0;
+      for (let item of cart) {
+        const p = await fetchProductById(item.id);
+        total += p.price * item.qty;
+        item.price = p.price;
+      }
+
+      const shippingCost = parseFloat(shipping);
+      total += shippingCost;
+
+      const shippingAddress = "N/A"; // You can add input field if needed
+      const userId = localStorage.getItem("userId");
+      if (!userId) return alert("Login first");
+
+      const res = await placeOrderAPI({ user_id: userId, total, shipping_address: shippingAddress, items: cart });
+      if (res.orderId) {
+        alert("Order placed successfully!");
+        localStorage.removeItem("cart");
+        location.href = "shop.html";
+      }
+    });
+
+    updateCart();
+  </script>
+
+</body>
+</html>

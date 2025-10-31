@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login </title>
+  <link rel="stylesheet" href="css/login.css" />
+  <style>
+    body{
+      background-image: url("images/d3.webp");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: cover;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <form class="login-form">
+      <h2>Login</h2>
+      <p>Have an account?</p>
+
+      <input type="text" id="username"  placeholder="Username" />
+      <div class="password-container">
+        <input type="password" id="password" placeholder="Password" />
+        <span class="toggle-password">👁️</span>
+      </div>
+
+      <button type="button" id="loginBtn">SIGN IN</button>
+
+      <div class="options">
+        <label><input type="checkbox" /> Remember Me</label>
+        <a href="#">Forgot Password</a>
+      </div>
+
+      <div class="social-login">
+        <p>Or Sign In With</p>
+        <div class="social-buttons">
+          <button class="fb">Facebook</button>
+          <button class="tw">Twitter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script type="module">
+    import { loginUser } from "./js/api.js";
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      if (!username || !password) return alert("Enter username and password");
+
+      const res = await loginUser(username, password);
+      if (res.token) {
+        localStorage.setItem("userId", res.userId);
+        localStorage.setItem("token", res.token);
+        alert("Login successful!");
+        location.href = "shop.html";
+      } else {
+        alert(res.message || "Login failed");
+      }
+    });
+
+    // Toggle password visibility
+    document.querySelector(".toggle-password").addEventListener("click", () => {
+      const passField = document.getElementById("password");
+      passField.type = passField.type === "password" ? "text" : "password";
+    });
+  </script>
+</body>
+</html>
